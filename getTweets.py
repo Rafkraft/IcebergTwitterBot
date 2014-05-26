@@ -1,8 +1,11 @@
 import json
+import tweepy
+# import twitter
 
 from tweepy import Stream
 from tweepy import OAuthHandler
 from tweepy.streaming import StreamListener
+# from twitter import Twitter
 
 
 ckey ='EgLx9a2h748H0r5zH1zSshdRY'
@@ -10,8 +13,60 @@ csecret ='C06Xesjs1S23X8ClP1Q9BiCNIAXCRBAEia139uSXyymCmvjZiA'
 atoken ='136394046-GmTHewzpiWVh42IkUebTQ7rOSrQt1V4P8aJxsyaH'
 asecret ='MSsI3f2mLmepyK1qMZ7utzP0nFGBOnUQ9JaGbcEjGWg7d'
 
-looking_for = 'TousUnisContreLeFN'
+def analyseTweet(tweet):
 
+    length =  len(tweet.entities['hashtags']);
+    tweetId= tweet.id
+    sizeok = False
+    url = False
+
+    if length==1:
+        print 'only one hashtag'
+        first_hashtag = tweet.entities['hashtags'][0]['text']
+
+    if length==2:
+        print 'two hashtags'
+        first_hashtag = tweet.entities['hashtags'][0]['text']
+        second_hashtag = tweet.entities['hashtags'][1]['text']
+
+        if first_hashtag[0] == 'T' or first_hashtag[0] == 't':
+            size =  first_hashtag.split('_')
+            sizeok = size[1]
+
+        if second_hashtag[0] == 'T' or second_hashtag[0] == 't':
+            size =  second_hashtag.split('_')
+            sizeok = size[1]
+
+    print sizeok
+
+
+    if sizeok:
+        api.update_status('Votre achat a ete enregistre, taille %s'%(sizeok),tweetId)
+    else:
+        api.update_status('Votre achat a ete enregistre',tweetId)
+
+
+    #if tweet.entities['hashtags'][1]:
+    #    second_hashtag = tweet.entities['hashtags'][1]['text']
+    #    print second_hashtag
+
+    parent_id = tweet.in_reply_to_status_id
+
+    parent_status = api.get_status(str(parent_id))
+    # print parent_status
+
+    product_url = False
+
+    for url in parent_status.entities['urls']:
+        link = url['expanded_url']
+        if 'modizy.com' in link:
+            product_url = link
+
+    #if product_url:
+        #print "Need to add %s to the cart of user %s" % (product_url, parent_status.user.id)
+        #print 'ok'
+
+    #print parent_id
 
 class listener(StreamListener):
     def on_data(self, data):
@@ -20,7 +75,6 @@ class listener(StreamListener):
         #print jsonData
 
         hashtags = jsonData['entities']['hashtags']
-
         has_hashtag = False
 
         for hashtag in hashtags:
@@ -29,6 +83,8 @@ class listener(StreamListener):
 
         if has_hashtag:
             print "GOOOOD"
+            print jsonData['text']
+            analyseTweet(jsonData)
         else:
             print "BADDD"
 
@@ -39,12 +95,33 @@ class listener(StreamListener):
 
 auth=OAuthHandler(ckey,csecret)
 auth.set_access_token(atoken,asecret)
+api = tweepy.API(auth)
+
+#status = twitter.showStatus(id="112652479837110273")
+#print status['text']
+
+def getTweet(search_term, periods = 60*60*24):
+    results = api.search(q=search_term, rpp=periods)
+    #json_results = json.loads(results)
+
+    for tweet in results:
+        # print tweet.entities['hashtags']
+        # print tweet.text
+        analyseTweet(tweet)
+
+    return results
 
 
-def getTweet():
+def listenToTweets(search_term):
     twitterStream = Stream(auth, listener())
-    twitterStream.filter(track=[looking_for])
+    twitterStream.filter(track=[search_term])
+
+    return True
+
 
 if __name__ == '__main__':
-    getTweet()
+    looking_for = '#Modizy_bot'
+
+    # listenToTweets(looking_for)
+    getTweet(looking_for)
 
