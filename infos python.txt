@@ -1,0 +1,11 @@
+
+
+
+
+
+lancer l'environnement :  source env/bin/activate
+installer un package : pip install package_name
+
+
+
+tuto twitter : http://grahamnic.wordpress.com/2013/09/15/python-using-the-twitter-api-to-datamine/
