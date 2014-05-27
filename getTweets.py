@@ -17,38 +17,21 @@ def analyseTweet(tweet):
 
     length =  len(tweet.entities['hashtags']);
     tweetId= tweet.id
-    sizeok = False
+    size = False
     url = False
 
-    if length==1:
-        print 'only one hashtag'
-        first_hashtag = tweet.entities['hashtags'][0]['text']
+    for hashtag in tweet.entities['hashtags']:
+        if hashtag['text'][0] == 'T' or hashtag['text'][0] == 't':
+            size =  hashtag['text'].split('_')
+            size = size[1]
 
-    if length==2:
-        print 'two hashtags'
-        first_hashtag = tweet.entities['hashtags'][0]['text']
-        second_hashtag = tweet.entities['hashtags'][1]['text']
+    print size
 
-        if first_hashtag[0] == 'T' or first_hashtag[0] == 't':
-            size =  first_hashtag.split('_')
-            sizeok = size[1]
-
-        if second_hashtag[0] == 'T' or second_hashtag[0] == 't':
-            size =  second_hashtag.split('_')
-            sizeok = size[1]
-
-    print sizeok
-
-
-    if sizeok:
-        api.update_status('Votre achat a ete enregistre, taille %s'%(sizeok),tweetId)
+    if size:
+        api.update_status('Votre achat a ete enregistre, taille %s'%(size),tweetId)
     else:
         api.update_status('Votre achat a ete enregistre',tweetId)
 
-
-    #if tweet.entities['hashtags'][1]:
-    #    second_hashtag = tweet.entities['hashtags'][1]['text']
-    #    print second_hashtag
 
     parent_id = tweet.in_reply_to_status_id
 
@@ -61,12 +44,6 @@ def analyseTweet(tweet):
         link = url['expanded_url']
         if 'modizy.com' in link:
             product_url = link
-
-    #if product_url:
-        #print "Need to add %s to the cart of user %s" % (product_url, parent_status.user.id)
-        #print 'ok'
-
-    #print parent_id
 
 class listener(StreamListener):
     def on_data(self, data):
