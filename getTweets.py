@@ -13,12 +13,19 @@ csecret ='C06Xesjs1S23X8ClP1Q9BiCNIAXCRBAEia139uSXyymCmvjZiA'
 atoken ='136394046-GmTHewzpiWVh42IkUebTQ7rOSrQt1V4P8aJxsyaH'
 asecret ='MSsI3f2mLmepyK1qMZ7utzP0nFGBOnUQ9JaGbcEjGWg7d'
 
+auth=OAuthHandler(ckey,csecret)
+auth.set_access_token(atoken,asecret)
+api = tweepy.API(auth)
+
+
+
 def analyseTweet(tweet):
 
     length =  len(tweet.entities['hashtags']);
-    tweetId= tweet.id
     size = False
     url = False
+
+    
 
     for hashtag in tweet.entities['hashtags']:
         if hashtag['text'][0] == 'T' or hashtag['text'][0] == 't':
@@ -28,15 +35,18 @@ def analyseTweet(tweet):
     print size
 
     if size:
-        api.update_status('Votre achat a ete enregistre, taille %s'%(size),tweetId)
+        api.update_status('Votre achat a ete enregistre, taille %s'%(size),tweet.id)
     else:
-        api.update_status('Votre achat a ete enregistre',tweetId)
+        api.update_status('Votre achat a ete enregistre',tweet.id)
+        print 'ok'
 
 
     parent_id = tweet.in_reply_to_status_id
 
     parent_status = api.get_status(str(parent_id))
-    # print parent_status
+
+
+    print parent_status
 
     product_url = False
 
@@ -70,9 +80,7 @@ class listener(StreamListener):
     def on_error(self,status):
         print status
 
-auth=OAuthHandler(ckey,csecret)
-auth.set_access_token(atoken,asecret)
-api = tweepy.API(auth)
+
 
 #status = twitter.showStatus(id="112652479837110273")
 #print status['text']
@@ -84,6 +92,7 @@ def getTweet(search_term, periods = 60*60*24):
     for tweet in results:
         # print tweet.entities['hashtags']
         # print tweet.text
+        print '1 tweet'
         analyseTweet(tweet)
 
     return results
@@ -99,6 +108,13 @@ def listenToTweets(search_term):
 if __name__ == '__main__':
     looking_for = '#Modizy_bot'
 
-    # listenToTweets(looking_for)
-    getTweet(looking_for)
+    listenToTweets(looking_for)
+    #getTweet(looking_for)
+
+
+
+
+
+
+
 
